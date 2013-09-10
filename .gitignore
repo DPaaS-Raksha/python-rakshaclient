@@ -1,0 +1,17 @@
+.coverage
+.venv
+.tox
+.testrepository
+subunit.log
+*,cover
+cover
+*.pyc
+.idea
+*.swp
+*~
+AUTHORS
+ChangeLog
+build
+dist
+rakshaclient/versioninfo
+python_rakshaclient.egg-info
