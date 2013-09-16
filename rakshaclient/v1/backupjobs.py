@@ -92,9 +92,9 @@ class BackupJobManager(base.ManagerWithFind):
         self._execute("/backupjobs/%s" % base.getid(backupjob_id))
 
     def prepare(self, backupjob_id):
-        """Executes a backup job.
+        """Prepares a backup job.
 
-        :param backupjob_id: The :class:`BackupJob` to execute.
+        :param backupjob_id: The :class:`BackupJob` to prepare.
         """
         self._execute("/backupjobs/%s?prepare=1" % base.getid(backupjob_id))
         

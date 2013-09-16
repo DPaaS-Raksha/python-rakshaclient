@@ -18,6 +18,12 @@
 BackupJobRuns interface (1.1 extension).
 """
 
+import six
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
+    
 from rakshaclient import base
 
 
@@ -43,16 +49,29 @@ class BackupJobRunsManager(base.Manager):
         """
         return self._get("/backupjobruns/%s" % backupjobrun_id, "backupjobrun")
 
-    def list(self, detailed=True):
+    def list(self, detailed=True, search_opts=None):
         """Get a list of all backup job runs.
 
         :rtype: list of :class:`BackupJobRun`
         """
-        if detailed is True:
-            return self._list("/backupjobruns/detail", "backupjobruns")
-        else:
-            return self._list("/backupjobruns", "backupjobruns")
+        if search_opts is None:
+            search_opts = {}   
+            
+        qparams = {}
 
+        for opt, val in six.iteritems(search_opts):
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urlencode(qparams) if qparams else ""
+
+        detail = ""
+        if detailed:
+            detail = "/detail"
+
+        return self._list("/backupjobruns%s%s" % (detail, query_string),
+                          "backupjobruns")
+                          
     def delete(self, backupjobrun_id):
         """Delete a backup job run.
 

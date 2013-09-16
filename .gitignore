@@ -9,6 +9,8 @@ cover
 .idea
 *.swp
 *~
+.project
+.pydevproject
 AUTHORS
 ChangeLog
 build

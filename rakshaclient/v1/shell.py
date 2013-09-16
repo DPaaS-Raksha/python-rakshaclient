@@ -57,17 +57,6 @@ def _poll_for_status(poll_fn, obj_id, action, final_ok_states,
             print_progress(progress)
             time.sleep(poll_period)
 
-
-def _find_volume(cs, volume):
-    """Get a volume by ID."""
-    return utils.find_resource(cs.volumes, volume)
-
-
-def _find_volume_snapshot(cs, snapshot):
-    """Get a volume snapshot by ID."""
-    return utils.find_resource(cs.volume_snapshots, snapshot)
-
-
 def _find_backupjob(cs, backupjob_id):
     """Get a backup job by ID."""
     return utils.find_resource(cs.backupjobs, backupjob_id)
@@ -76,14 +65,6 @@ def _find_backupjobrun(cs, backupjobrun_id):
     """Get a backup job run by ID."""
     return utils.find_resource(cs.backupjobruns, backupjobrun_id)
     
-def _print_volume(volume):
-    utils.print_dict(volume._info)
-
-
-def _print_volume_snapshot(snapshot):
-    utils.print_dict(snapshot._info)
-
-
 def _translate_keys(collection, convert):
     for item in collection:
         keys = item.__dict__.keys()
@@ -91,14 +72,8 @@ def _translate_keys(collection, convert):
             if from_key in keys and to_key not in keys:
                 setattr(item, to_key, item._info[from_key])
 
-
-def _translate_volume_keys(collection):
-    convert = [('displayName', 'display_name'), ('volumeType', 'volume_type')]
-    _translate_keys(collection, convert)
-
-
-def _translate_volume_snapshot_keys(collection):
-    convert = [('displayName', 'display_name'), ('volumeId', 'volume_id')]
+def _translate_backupjob_backupjobrun_keys(collection):
+    convert = [('backupjobId', 'backupjob_Id')]
     _translate_keys(collection, convert)
 
 
@@ -114,11 +89,6 @@ def _extract_metadata(args):
 
         metadata[key] = value
     return metadata
-
-
-
-def _print_volume_type_list(vtypes):
-    utils.print_list(vtypes, ['ID', 'Name'])
 
 
 def _print_type_and_extra_specs_list(vtypes):
@@ -142,33 +112,11 @@ def do_credentials(cs, args):
 _quota_resources = ['volumes', 'snapshots', 'gigabytes']
 
 
-@utils.service_type('backupjobs')
-def do_absolute_limits(cs, args):
-    """Print a list of absolute limits for a user"""
-    limits = cs.limits.get().absolute
-    columns = ['Name', 'Value']
-    utils.print_list(limits, columns)
-
-
-@utils.service_type('backupjobs')
-def do_rate_limits(cs, args):
-    """Print a list of rate limits for a user"""
-    limits = cs.limits.get().rate
-    columns = ['Verb', 'URI', 'Value', 'Remain', 'Unit', 'Next_Available']
-    utils.print_list(limits, columns)
-
-
 def _print_type_extra_specs(vol_type):
     try:
         return vol_type.get_keys()
     except exceptions.NotFound:
         return "N/A"
-
-
-def _find_volume_type(cs, vtype):
-    """Get a volume type by name or ID."""
-    return utils.find_resource(cs.volume_types, vtype)
-
 
 @utils.arg('instanceid', metavar='<vm instance id>',
            help='ID of the vm instance to backup.')
@@ -250,11 +198,20 @@ def do_backupjobrun_show(cs, args):
 
     utils.print_dict(info)
 
-
+@utils.arg('--backupjob_id',
+           metavar='<backupjob_id>',
+           default=None,
+           help='Filter results by backupjob_id')
 @utils.service_type('backupjobs')
 def do_backupjobrun_list(cs, args):
     """List all the backup jobs."""
-    backupjobruns = cs.backupjobruns.list()
+
+    search_opts = {
+        'backupjob_id': args.backupjob_id,
+    }
+        
+        
+    backupjobruns = cs.backupjobruns.list(search_opts=search_opts)
     columns = ['ID', 'Backup Job', 'Type','Status']
     utils.print_list(backupjobruns, columns)
 
